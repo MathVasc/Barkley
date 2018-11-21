@@ -70,7 +70,7 @@ class Slave {
     }
     
     private void updateTime(int value){
-        log.writeNewMessage(localhost.toString(), String.valueOf(time), String.valueOf(time+value));
+        log.writeNewMessage(localhost.toString(), String.valueOf(time), String.valueOf(value));
         time= value;
     }
     
