@@ -58,7 +58,7 @@ class Slave {
             String sentence = new String(receivePacket.getData());
             String[] sentenceComponents = sentence.split(":");
             if (sentenceComponents[1].equals("master")) {
-                if (sentenceComponents[2].equals("RequestTime")){
+                if (sentenceComponents[2].contains("RequestTime")){
                     sendMessage(sentenceComponents[0], receivePacket);
                 }else{
                     System.out.println(sentenceComponents[0]);
