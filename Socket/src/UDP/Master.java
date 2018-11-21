@@ -7,6 +7,7 @@ package UDP;
  */
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,44 +96,44 @@ class Master {
             return null;
     }
 
-    private Map<NodeMachine, Integer> deltaTimes(Map<NodeMachine, DatagramPacket> responses){
-        Map<NodeMachine, Integer> deltas = new HashMap<>();
+    private List<BerkeleyTimeHelper> deltaTimes(Map<NodeMachine, DatagramPacket> responses){
+        List<BerkeleyTimeHelper> deltasAndTimes = new ArrayList<>();
         
         for (Map.Entry<NodeMachine, DatagramPacket> response : responses.entrySet()){
             String sentence = new String(response.getValue().getData(), response.getValue().getOffset(), response.getValue().getLength());
             int slaveTime = Integer.parseInt(sentence.split(":")[2]);
             if (slaveTime - time <= limit) {
                 int delta = slaveTime - time;
-                deltas.put(response.getKey(), delta);
+                deltasAndTimes.add(new BerkeleyTimeHelper(response.getKey(), delta, slaveTime));
             }
         }
         
-        return deltas;
+        return deltasAndTimes;
     }
     
-    private Map<NodeMachine, Integer> timeCorrect(Map<NodeMachine, Integer> deltas){
+    private Map<NodeMachine, Integer> timeCorrect(List<BerkeleyTimeHelper> slaveTimesAndDelta){
         Map<NodeMachine, Integer> correctTimes = new HashMap<>();
         
         int sum = 0;
         
-        for (Map.Entry<NodeMachine, Integer> delta : deltas.entrySet()) {
-            sum+= delta.getValue();
+        for (BerkeleyTimeHelper timeAndDelta : slaveTimesAndDelta){
+            sum+= timeAndDelta.delta;
         }
         
         int avg;
         
         if (0 <= limit){
-            avg = (sum+0)/deltas.size();
+            avg = (sum+0)/slaveTimesAndDelta.size();
             log.writeNewMessage(localhost.toString(), String.valueOf(time), String.valueOf(time-avg));
             time = time - avg;
         }else{
-            avg = sum/deltas.size();
+            avg = sum/slaveTimesAndDelta.size();
         }
         
-        for (Map.Entry<NodeMachine, Integer> delta : deltas.entrySet()) {
-            System.out.println("delta Value: " + delta.getValue());
+        for (BerkeleyTimeHelper timeAndDelta : slaveTimesAndDelta){
+            System.out.println("delta Value: " + timeAndDelta.delta);
             System.out.println("avg: " + avg);
-            correctTimes.put(delta.getKey(), delta.getValue()-avg);
+            correctTimes.put(timeAndDelta.slave, timeAndDelta.slaveTime-avg);
         }
         
         return correctTimes;
