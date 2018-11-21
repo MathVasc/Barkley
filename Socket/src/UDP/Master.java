@@ -97,7 +97,7 @@ class Master {
         Map<NodeMachine, Integer> deltas = new HashMap<>();
         
         for (Map.Entry<NodeMachine, DatagramPacket> response : responses.entrySet()){
-            String sentence = new String(response.getValue().getData());
+            String sentence = new String(response.getValue().getData(), 0, response.getValue().getLength());
             int slaveTime = Integer.parseInt(sentence.split(":")[1]);
             
             if (slaveTime <= limit) {
