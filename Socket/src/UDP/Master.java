@@ -24,6 +24,8 @@ class Master {
     DatagramSocket[] serverSockets;
     int round = 0;
     InetAddress localhost;
+    int deltaInit;
+    int deltaFinish;
 
     public Master(int time, List<NodeMachine> slaves, int limit, String logFile) {
         this.time = time;
@@ -99,7 +101,7 @@ class Master {
         for (Map.Entry<NodeMachine, DatagramPacket> response : responses.entrySet()){
             String sentence = new String(response.getValue().getData(), response.getValue().getOffset(), response.getValue().getLength());
             int slaveTime = Integer.parseInt(sentence.split(":")[2]);
-            if (slaveTime <= limit) {
+            if (slaveTime - time <= limit) {
                 int delta = slaveTime - time;
                 deltas.put(response.getKey(), delta);
             }
@@ -119,8 +121,8 @@ class Master {
         
         int avg;
         
-        if (time <= limit){
-            avg = (sum+time)/deltas.size();
+        if (0 <= limit){
+            avg = (sum+0)/deltas.size();
             log.writeNewMessage(localhost.toString(), String.valueOf(time), String.valueOf(time-avg));
             time = time - avg;
         }else{
@@ -144,7 +146,6 @@ class Master {
                     responses.put(slave, response);
                 }
             }
-            
             if (responses.size() > 0){
                 Map<NodeMachine, Integer> timesCorrect = timeCorrect(deltaTimes(responses));
             
