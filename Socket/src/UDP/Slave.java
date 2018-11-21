@@ -61,7 +61,9 @@ class Slave {
                 if (sentenceComponents[2].equals("RequestTime")){
                     sendMessage(sentenceComponents[0], receivePacket);
                 }else{
-                    System.out.println(sentence);
+                    System.out.println(sentenceComponents[0]);
+                    System.out.println(sentenceComponents[1]);
+                    System.out.println(sentenceComponents[2]);
                     updateTime(Integer.parseInt(sentenceComponents[2]));
                 }
             }
