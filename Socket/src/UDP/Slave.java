@@ -62,7 +62,7 @@ class Slave {
                 if (sentenceComponents[2].equals("RequestTime")){
                     sendMessage(sentenceComponents[0], receivePacket);
                 }else{
-                    updateTime(Integer.parseInt(sentenceComponents[1]));
+                    updateTime(Integer.parseInt(sentenceComponents[2]));
                 }
             }
         } catch (IOException ex) {
