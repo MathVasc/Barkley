@@ -24,7 +24,6 @@ class Master {
     DatagramSocket[] serverSockets;
     int round = 0;
     InetAddress localhost;
-    DatagramSocket masterSocket;
 
     public Master(int time, List<NodeMachine> slaves, int limit, String logFile) {
         this.time = time;
@@ -34,10 +33,7 @@ class Master {
         this.serverSockets = new DatagramSocket[slaves.size()];
         try {
             this.localhost = InetAddress.getLocalHost();
-            this.masterSocket = new DatagramSocket(8081);
         } catch (UnknownHostException ex) {
-            Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SocketException ex) {
             Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
         }
         slaveInicializer();
@@ -80,7 +76,7 @@ class Master {
                 long delay = 20000L;
                 timer.schedule(task, delay);
 
-                masterSocket.receive(receivePacket);
+                serverSockets[slaves.indexOf(slave)].receive(receivePacket);
                 timer.cancel();
                 slave.setReceivePackage(true);
                 String sentence = new String(receivePacket.getData());
@@ -90,7 +86,7 @@ class Master {
                 }
             } catch (IOException ex) {
                 if (!slave.isReceivePackage()) {
-                    masterSocket.connect(slave.getIp(), slave.getPort());
+                    serverSockets[slaves.indexOf(slave)].connect(slave.getIp(), slave.getPort());
                 }
                 Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
             }
