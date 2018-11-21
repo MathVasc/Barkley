@@ -125,7 +125,7 @@ class Master {
         if (0 <= limit){
             avg = (sum+0)/(slaveTimesAndDelta.size()+1);
             log.writeNewMessage(localhost.toString(), String.valueOf(time), String.valueOf(time-avg));
-            time = time - avg;
+            time = time+(avg-0);
         }else{
             avg = sum/slaveTimesAndDelta.size();
         }
@@ -133,7 +133,7 @@ class Master {
         for (BerkeleyTimeHelper timeAndDelta : slaveTimesAndDelta){
             System.out.println("delta Value: " + timeAndDelta.delta);
             System.out.println("avg: " + avg);
-            correctTimes.put(timeAndDelta.slave, timeAndDelta.slaveTime-avg);
+            correctTimes.put(timeAndDelta.slave, timeAndDelta.slaveTime+(avg-timeAndDelta.delta));
         }
         
         return correctTimes;
