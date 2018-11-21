@@ -57,7 +57,6 @@ class Slave {
             masterSocket.receive(receivePacket);
             String sentence = new String(receivePacket.getData());
             String[] sentenceComponents = sentence.split(":");
-            System.out.println(sentence);
             if (sentenceComponents[1].equals("master")) {
                 if (sentenceComponents[2].equals("RequestTime")){
                     sendMessage(sentenceComponents[0], receivePacket);
