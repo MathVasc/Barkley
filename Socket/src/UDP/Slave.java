@@ -55,10 +55,10 @@ class Slave {
         DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
         try {
             masterSocket.receive(receivePacket);
-            String sentence = new String(receivePacket.getData());
+            String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
             String[] sentenceComponents = sentence.split(":");
             if (sentenceComponents[1].equals("master")) {
-                if (sentenceComponents[2].contains("RequestTime")){
+                if (sentenceComponents[2].equals("RequestTime")){
                     sendMessage(sentenceComponents[0], receivePacket);
                 }else{
                     System.out.println(sentenceComponents[0]);
