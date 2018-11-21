@@ -130,6 +130,8 @@ class Master {
         }
         
         for (Map.Entry<NodeMachine, Integer> delta : deltas.entrySet()) {
+            System.out.println("delta Value: " + delta.getValue());
+            System.out.println("avg: " + avg);
             correctTimes.put(delta.getKey(), delta.getValue()-avg);
         }
         
