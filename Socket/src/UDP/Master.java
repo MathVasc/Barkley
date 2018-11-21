@@ -123,7 +123,7 @@ class Master {
         int avg;
         
         if (0 <= limit){
-            avg = (sum+0)/slaveTimesAndDelta.size();
+            avg = (sum+0)/slaveTimesAndDelta.size()+1;
             log.writeNewMessage(localhost.toString(), String.valueOf(time), String.valueOf(time-avg));
             time = time - avg;
         }else{
