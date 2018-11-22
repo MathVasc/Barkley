@@ -43,7 +43,6 @@ class Slave {
     
     private void sendMessage(String round, DatagramPacket packet){
         String sentence = round + "," + "slave" + "," + machineTime.getHour() + ":" + machineTime.getMinute() + ":" + machineTime.getSecond();
-        System.out.println("Slave sentence to master: "+sentence);
         byte[] packageMsg = sentence.getBytes();
         DatagramPacket sendPacket = new DatagramPacket(packageMsg, sentence.length(), packet.getAddress(), packet.getPort());
         
@@ -61,10 +60,6 @@ class Slave {
             masterSocket.receive(receivePacket);
             String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
             String[] sentenceComponents = sentence.split(",");
-            System.out.println(sentence);
-            System.out.println(sentenceComponents[0]);
-            System.out.println(sentenceComponents[1]);
-            System.out.println(sentenceComponents[2]);
             if (sentenceComponents[1].equals("master")) {
                 if (sentenceComponents[2].equals("RequestTime")){
                     sendMessage(sentenceComponents[0], receivePacket);
@@ -80,7 +75,6 @@ class Slave {
     }
     
     private void updateTime(LocalTime newTime){
-        System.out.println("Novo horario: " + newTime.toString());
         try {
             Runtime.getRuntime().exec("sudo +%T date -s " + newTime.getHour() + ":" + newTime.getMinute() + ":" + newTime.getSecond()); // MMddhhmm[[yy]yy]
         } catch (IOException ex) {

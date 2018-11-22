@@ -106,7 +106,6 @@ class Master {
         
         for (Map.Entry<NodeMachine, DatagramPacket> response : responses.entrySet()){
             String sentence = new String(response.getValue().getData(), response.getValue().getOffset(), response.getValue().getLength());
-            System.out.println(sentence);
             String stringTime = sentence.split(",")[2];
             String[] stringTimeComponents = stringTime.split(":");
             LocalTime slaveTime = LocalTime.of(Integer.parseInt(stringTimeComponents[0]), Integer.parseInt(stringTimeComponents[1]));
@@ -114,8 +113,6 @@ class Master {
             
             if (differenceTime.getHour() == 0){
                 if (differenceTime.getMinute() <= limit){
-                    System.out.println("Escravo dentro limite:"+slaveTime.toString());
-                    System.out.println("Diferença dentro limit:"+differenceTime.toString());
                     deltasAndTimes.add(new BerkeleyTimeHelper(response.getKey(), differenceTime.getMinute(), slaveTime));
                 }
             }else{
@@ -141,8 +138,6 @@ class Master {
             LocalTime differenceTime = slaveTime.minusHours(machineTime.getHour()).minusMinutes(machineTime.getMinute());
             if (differenceTime.getHour() == 0){
                 if (differenceTime.getMinute() > limit){
-                    System.out.println("Escravo fora limite:"+slaveTime.toString());
-                    System.out.println("Diferença fora limite:"+differenceTime.toString());
                     outOfLimit.add(response.getKey());
                 }
             }else {
@@ -170,14 +165,12 @@ class Master {
             avg = (sum+0)/(slaveTimesAndDelta.size()+1);
             TemporalAmount amout = Duration.ofMinutes((avg));
             LocalTime afterCalculus = machineTime.plus(amout);
-            System.out.println("Novo horario: "+afterCalculus);
             try {
                 Runtime.getRuntime().exec("sudo +%T date -s " + afterCalculus.getHour() + ":" + afterCalculus.getMinute() + ":" + afterCalculus.getSecond()); // MMddhhmm[[yy]yy]
             } catch (IOException ex) {
                 Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
             }
             log.writeNewMessage(localhost.toString(), machineTime, afterCalculus);
-            machineTime = afterCalculus;
         }else{
             avg = sum/slaveTimesAndDelta.size();
         }
@@ -212,7 +205,7 @@ class Master {
                 List<NodeMachine> outOfLimitNodes = outOfLimitTimes(responses);
                 
                 for (NodeMachine node : outOfLimitNodes){
-                    String sendTime =  machineTime.getHour() + ":" + machineTime.getMinute() + ":" + machineTime.getSecond();
+                    String sendTime =  LocalDateTime.now().toLocalTime().getHour() + ":" + LocalDateTime.now().toLocalTime().getMinute() + ":" + LocalDateTime.now().toLocalTime().getSecond();
                     sendMessage(node, round, sendTime);
                 }
                 round++;
