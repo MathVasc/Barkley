@@ -62,6 +62,9 @@ class Slave {
             String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
             String[] sentenceComponents = sentence.split("|");
             System.out.println(sentence);
+            System.out.println(sentenceComponents[0]);
+            System.out.println(sentenceComponents[1]);
+            System.out.println(sentenceComponents[2]);
             if (sentenceComponents[1].equals("master")) {
                 if (sentenceComponents[2].equals("RequestTime")){
                     sendMessage(sentenceComponents[0], receivePacket);
