@@ -7,6 +7,9 @@ package UDP;
  */
 import java.io.IOException;
 import java.net.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +22,7 @@ import java.util.logging.Logger;
 class Master {
 
     int time;
+    LocalDateTime machineTime = LocalDateTime.now();
     List<NodeMachine> slaves;
     int limit;
     BerkeleyLog log;
@@ -40,6 +44,10 @@ class Master {
             Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
         }
         slaveInicializer();
+        
+        System.out.println(machineTime);
+        TemporalAmount amout = Duration.ofMinutes(80);
+        System.out.println(machineTime.plus(amout));
     }
 
     private void slaveInicializer() {
