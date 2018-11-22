@@ -58,7 +58,7 @@ class Master {
     }
 
     private void sendMessage(NodeMachine slave, int round, String message) {
-            String sentence = round + "|" + "master" + "|" + message;
+            String sentence = round + "," + "master" + "," + message;
             byte[] packageMsg = sentence.getBytes();
             DatagramPacket sendPacket = new DatagramPacket(packageMsg, sentence.length(), slave.getIp(), slave.getPort());
             try {
@@ -88,7 +88,7 @@ class Master {
                 timer.cancel();
                 slave.setReceivePackage(true);
                 String sentence = new String(receivePacket.getData());
-                String[] sentenceComponents = sentence.split("|");
+                String[] sentenceComponents = sentence.split(",");
                 if (sentenceComponents[0].equals(String.valueOf(round)) && !sentenceComponents[1].equals("master")) {
                     return receivePacket;
                 }
@@ -107,7 +107,7 @@ class Master {
         for (Map.Entry<NodeMachine, DatagramPacket> response : responses.entrySet()){
             String sentence = new String(response.getValue().getData(), response.getValue().getOffset(), response.getValue().getLength());
             System.out.println(sentence);
-            String stringTime = sentence.split("|")[2];
+            String stringTime = sentence.split(",")[2];
             String[] stringTimeComponents = stringTime.split(":");
             LocalTime slaveTime = LocalTime.of(Integer.parseInt(stringTimeComponents[0]), Integer.parseInt(stringTimeComponents[1]));
             LocalTime differenceTime = slaveTime.minusHours(machineTime.getHour()).minusMinutes(machineTime.getMinute());
@@ -135,7 +135,7 @@ class Master {
         for (Map.Entry<NodeMachine, DatagramPacket> response : responses.entrySet()){
             String sentence = new String(response.getValue().getData(), response.getValue().getOffset(), response.getValue().getLength());
 
-            String stringTime = sentence.split("|")[2];
+            String stringTime = sentence.split(",")[2];
             String[] stringTimeComponents = stringTime.split(":");
             LocalTime slaveTime = LocalTime.of(Integer.parseInt(stringTimeComponents[0]), Integer.parseInt(stringTimeComponents[1]));
             LocalTime differenceTime = slaveTime.minusHours(machineTime.getHour()).minusMinutes(machineTime.getMinute());

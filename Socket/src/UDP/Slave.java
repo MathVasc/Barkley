@@ -42,7 +42,7 @@ class Slave {
     }
     
     private void sendMessage(String round, DatagramPacket packet){
-        String sentence = round + "|" + "slave" + "|" + machineTime.toString();
+        String sentence = round + "," + "slave" + "," + machineTime.toString();
         System.out.println("Slave sentence to master: "+sentence);
         byte[] packageMsg = sentence.getBytes();
         DatagramPacket sendPacket = new DatagramPacket(packageMsg, sentence.length(), packet.getAddress(), packet.getPort());
@@ -60,7 +60,7 @@ class Slave {
         try {
             masterSocket.receive(receivePacket);
             String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
-            String[] sentenceComponents = sentence.split("|");
+            String[] sentenceComponents = sentence.split(",");
             System.out.println(sentence);
             System.out.println(sentenceComponents[0]);
             System.out.println(sentenceComponents[1]);
