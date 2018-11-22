@@ -7,6 +7,8 @@ package UDP;
  */
 import java.io.*;
 import java.net.*;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +16,7 @@ class Slave {
     
     NodeMachine master;
     int time;
+    LocalTime machineTime = LocalDateTime.now().toLocalTime();
     BerkeleyLog log;
     DatagramSocket masterSocket;
     InetAddress localhost;
@@ -39,7 +42,7 @@ class Slave {
     }
     
     private void sendMessage(String round, DatagramPacket packet){
-        String sentence = round + ":" + "slave" + ":" + time;
+        String sentence = round + "|" + "slave" + "|" + time;
         byte[] packageMsg = sentence.getBytes();
         DatagramPacket sendPacket = new DatagramPacket(packageMsg, sentence.length(), packet.getAddress(), packet.getPort());
         
@@ -56,12 +59,14 @@ class Slave {
         try {
             masterSocket.receive(receivePacket);
             String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
-            String[] sentenceComponents = sentence.split(":");
+            String[] sentenceComponents = sentence.split("|");
             if (sentenceComponents[1].equals("master")) {
                 if (sentenceComponents[2].equals("RequestTime")){
                     sendMessage(sentenceComponents[0], receivePacket);
                 }else{
-                    updateTime(Integer.parseInt(sentenceComponents[2]));
+                    String[] stringTimeComponents = sentenceComponents[2].split(":");
+                    LocalTime newTime = LocalTime.of(Integer.parseInt(stringTimeComponents[0]), Integer.parseInt(stringTimeComponents[1]));
+                    updateTime(newTime);
                 }
             }
         } catch (IOException ex) {
@@ -69,13 +74,19 @@ class Slave {
         }
     }
     
-    private void updateTime(int value){
-        log.writeNewMessage(localhost.toString(), String.valueOf(time), String.valueOf(value));
-        time= value;
+    private void updateTime(LocalTime newTime){
+        try {
+            Runtime.getRuntime().exec("sudo +%T date -s " + newTime.getHour() + ":" + newTime.getMinute() + ":" + newTime.getSecond()); // MMddhhmm[[yy]yy]
+        } catch (IOException ex) {
+            Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        log.writeNewMessage(localhost.toString(), machineTime, newTime);
+        
     }
     
     public void work(){
         while (true) {
+            machineTime = LocalDateTime.now().toLocalTime();
             receiveMessage();
         }
     }

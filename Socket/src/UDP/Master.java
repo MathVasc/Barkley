@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +23,7 @@ import java.util.logging.Logger;
 class Master {
 
     int time;
-    LocalDateTime machineTime = LocalDateTime.now();
+    LocalTime machineTime = LocalDateTime.now().toLocalTime();
     List<NodeMachine> slaves;
     int limit;
     BerkeleyLog log;
@@ -44,10 +45,6 @@ class Master {
             Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
         }
         slaveInicializer();
-        
-        System.out.println(machineTime.toString());
-        TemporalAmount amout = Duration.ofMinutes(80);
-        System.out.println(machineTime.plus(amout).toString());
     }
 
     private void slaveInicializer() {
@@ -61,7 +58,7 @@ class Master {
     }
 
     private void sendMessage(NodeMachine slave, int round, String message) {
-            String sentence = round + ":" + "master" + ":" + message;
+            String sentence = round + "|" + "master" + "|" + message;
             byte[] packageMsg = sentence.getBytes();
             DatagramPacket sendPacket = new DatagramPacket(packageMsg, sentence.length(), slave.getIp(), slave.getPort());
             try {
@@ -91,7 +88,7 @@ class Master {
                 timer.cancel();
                 slave.setReceivePackage(true);
                 String sentence = new String(receivePacket.getData());
-                String[] sentenceComponents = sentence.split(":");
+                String[] sentenceComponents = sentence.split("|");
                 if (sentenceComponents[0].equals(String.valueOf(round)) && !sentenceComponents[1].equals("master")) {
                     return receivePacket;
                 }
@@ -109,18 +106,54 @@ class Master {
         
         for (Map.Entry<NodeMachine, DatagramPacket> response : responses.entrySet()){
             String sentence = new String(response.getValue().getData(), response.getValue().getOffset(), response.getValue().getLength());
-            int slaveTime = Integer.parseInt(sentence.split(":")[2]);
-            if (slaveTime - time <= limit) {
-                int delta = slaveTime - time;
-                deltasAndTimes.add(new BerkeleyTimeHelper(response.getKey(), delta, slaveTime));
+            
+            String stringTime = sentence.split("|")[2];
+            String[] stringTimeComponents = stringTime.split(":");
+            LocalTime slaveTime = LocalTime.of(Integer.parseInt(stringTimeComponents[0]), Integer.parseInt(stringTimeComponents[1]));
+            LocalTime differenceTime = slaveTime.minusHours(machineTime.getHour()).minusMinutes(machineTime.getMinute());
+            
+            if (differenceTime.getHour() == 0){
+                if (differenceTime.getMinute() <= limit){
+                    deltasAndTimes.add(new BerkeleyTimeHelper(response.getKey(), differenceTime.getMinute(), slaveTime));
+                }
+            }else{
+                if (differenceTime.getMinute() + (differenceTime.getHour()*60) <= limit){
+                    deltasAndTimes.add(new BerkeleyTimeHelper(response.getKey(), differenceTime.getMinute() + (differenceTime.getHour()*60), slaveTime));
+                }
             }
+            
         }
         
         return deltasAndTimes;
     }
     
-    private Map<NodeMachine, Integer> timeCorrect(List<BerkeleyTimeHelper> slaveTimesAndDelta){
-        Map<NodeMachine, Integer> correctTimes = new HashMap<>();
+    private List<NodeMachine> outOfLimitTimes(Map<NodeMachine, DatagramPacket> responses){
+        List<NodeMachine> outOfLimit = new ArrayList<>();
+        
+        for (Map.Entry<NodeMachine, DatagramPacket> response : responses.entrySet()){
+            String sentence = new String(response.getValue().getData(), response.getValue().getOffset(), response.getValue().getLength());
+
+            String stringTime = sentence.split("|")[2];
+            String[] stringTimeComponents = stringTime.split(":");
+            LocalTime slaveTime = LocalTime.of(Integer.parseInt(stringTimeComponents[0]), Integer.parseInt(stringTimeComponents[1]));
+            LocalTime differenceTime = slaveTime.minusHours(machineTime.getHour()).minusMinutes(machineTime.getMinute());
+            
+            if (differenceTime.getHour() == 0){
+                if (differenceTime.getMinute() > limit){
+                    outOfLimit.add(response.getKey());
+                }
+            }else {
+                if (differenceTime.getMinute() + (differenceTime.getHour()*60) > limit){
+                    outOfLimit.add(response.getKey());
+                }
+            }
+        }
+        
+        return outOfLimit;
+    }
+    
+    private Map<NodeMachine, LocalTime> timeCorrect(List<BerkeleyTimeHelper> slaveTimesAndDelta){
+        Map<NodeMachine, LocalTime> correctTimes = new HashMap<>();
         
         int sum = 0;
         
@@ -132,14 +165,22 @@ class Master {
         
         if (0 <= limit){
             avg = (sum+0)/(slaveTimesAndDelta.size()+1);
-            log.writeNewMessage(localhost.toString(), String.valueOf(time), String.valueOf(time-avg));
-            time = time+(avg-0);
+            TemporalAmount amout = Duration.ofMinutes((avg));
+            LocalTime afterCalculus = machineTime.plus(amout);
+            try {
+                Runtime.getRuntime().exec("sudo +%T date -s " + afterCalculus.getHour() + ":" + afterCalculus.getMinute() + ":" + afterCalculus.getSecond()); // MMddhhmm[[yy]yy]
+            } catch (IOException ex) {
+                Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            log.writeNewMessage(localhost.toString(), machineTime, afterCalculus);
+            machineTime = afterCalculus;
         }else{
             avg = sum/slaveTimesAndDelta.size();
         }
         
         for (BerkeleyTimeHelper timeAndDelta : slaveTimesAndDelta){
-            correctTimes.put(timeAndDelta.slave, timeAndDelta.slaveTime+(avg-timeAndDelta.delta));
+            TemporalAmount amout = Duration.ofMinutes((avg-timeAndDelta.delta));
+            correctTimes.put(timeAndDelta.slave, timeAndDelta.slaveTime.plus(amout));
         }
         
         return correctTimes;
@@ -147,6 +188,7 @@ class Master {
     
     public void work(){
         while(true){
+            machineTime = LocalDateTime.now().toLocalTime();
             Map<NodeMachine, DatagramPacket> responses = new HashMap<>();
             for (NodeMachine slave :slaves){
                 sendMessage(slave, round, "RequestTime");
@@ -156,10 +198,16 @@ class Master {
                 }
             }
             if (responses.size() > 0){
-                Map<NodeMachine, Integer> timesCorrect = timeCorrect(deltaTimes(responses));
+                Map<NodeMachine, LocalTime> timesCorrect = timeCorrect(deltaTimes(responses));
             
-                for (Map.Entry<NodeMachine, Integer> timeCorrect : timesCorrect.entrySet()) {
-                  sendMessage(timeCorrect.getKey(), round, String.valueOf(timeCorrect.getValue()));
+                for (Map.Entry<NodeMachine, LocalTime> timeCorrect : timesCorrect.entrySet()) {
+                    sendMessage(timeCorrect.getKey(), round, timeCorrect.toString());
+                }
+                
+                List<NodeMachine> outOfLimitNodes = outOfLimitTimes(responses);
+                
+                for (NodeMachine node : outOfLimitNodes){
+                    sendMessage(node, round, String.valueOf(time));
                 }
                 round++;
             }

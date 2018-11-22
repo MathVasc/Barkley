@@ -5,6 +5,8 @@
  */
 package UDP;
 
+import java.time.LocalTime;
+
 /**
  *
  * @author matheusdevasconcelos
@@ -12,9 +14,9 @@ package UDP;
 public class BerkeleyTimeHelper {
     NodeMachine slave;
     int delta;
-    int slaveTime;
+    LocalTime slaveTime;
 
-    public BerkeleyTimeHelper(NodeMachine slave, int delta, int slaveTime) {
+    public BerkeleyTimeHelper(NodeMachine slave, int delta, LocalTime slaveTime) {
         this.slave = slave;
         this.delta = delta;
         this.slaveTime = slaveTime;
