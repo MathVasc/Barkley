@@ -39,7 +39,7 @@ public class BerkeleyLog {
     public void writeNewMessage(String maquina, String horarioAntes, String horarioDepois){
         String msg = "Antes da sincronização: ["+horarioAntes+"] Ip da maquina: " + maquina + "\n";
         msg += "Depois da sincronização: [" +horarioDepois+"] Ip da maquina: " + maquina + "\n";
-        logger.log(Level.INFO, msg);
+        //logger.log(Level.INFO, msg);
     }
 
 }

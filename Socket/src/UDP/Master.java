@@ -45,9 +45,9 @@ class Master {
         }
         slaveInicializer();
         
-        System.out.println(machineTime);
+        System.out.println(machineTime.toString());
         TemporalAmount amout = Duration.ofMinutes(80);
-        System.out.println(machineTime.plus(amout));
+        System.out.println(machineTime.plus(amout).toString());
     }
 
     private void slaveInicializer() {
