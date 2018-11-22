@@ -76,7 +76,7 @@ class Slave {
     
     private void updateTime(LocalTime newTime){
         try {
-            Runtime.getRuntime().exec("sudo +%T date -s " + newTime.getHour() + ":" + newTime.getMinute() + ":" + newTime.getSecond()); // MMddhhmm[[yy]yy]
+            Runtime.getRuntime().exec("sudo date +%T -s " + newTime.getHour() + ":" + newTime.getMinute() + ":" + newTime.getSecond()); // MMddhhmm[[yy]yy]
         } catch (IOException ex) {
             Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
         }

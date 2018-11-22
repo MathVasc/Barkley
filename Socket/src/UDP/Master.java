@@ -166,7 +166,7 @@ class Master {
             TemporalAmount amout = Duration.ofMinutes((avg));
             LocalTime afterCalculus = machineTime.plus(amout);
             try {
-                Runtime.getRuntime().exec("sudo +%T date -s " + afterCalculus.getHour() + ":" + afterCalculus.getMinute() + ":" + afterCalculus.getSecond()); // MMddhhmm[[yy]yy]
+                Runtime.getRuntime().exec("sudo date +%T -s " + afterCalculus.getHour() + ":" + afterCalculus.getMinute() + ":" + afterCalculus.getSecond()); // MMddhhmm[[yy]yy]
             } catch (IOException ex) {
                 Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
             }
