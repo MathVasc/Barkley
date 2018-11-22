@@ -9,7 +9,8 @@ import java.util.List;
 
 /**
  *
- * @author matheusdevasconcelos
+ * @author Matheus de Vasconcelos Moura
+ * @author Gabriel Batista Tenorio
  */
 
 public class BerkeleyMain {

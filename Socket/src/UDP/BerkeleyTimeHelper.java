@@ -9,7 +9,8 @@ import java.time.LocalTime;
 
 /**
  *
- * @author matheusdevasconcelos
+ * @author Matheus de Vasconcelos Moura
+ * @author Gabriel Batista Tenorio
  */
 public class BerkeleyTimeHelper {
     NodeMachine slave;

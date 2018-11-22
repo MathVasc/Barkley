@@ -14,7 +14,8 @@ import java.util.logging.SimpleFormatter;
 
 /**
  *
- * @author 31660551
+ * @author Matheus de Vasconcelos Moura
+ * @author Gabriel Batista Tenorio
  */
 public class BerkeleyLog {
 
