@@ -42,7 +42,7 @@ class Slave {
     }
     
     private void sendMessage(String round, DatagramPacket packet){
-        String sentence = round + "," + "slave" + "," + machineTime.toString();
+        String sentence = round + "," + "slave" + "," + machineTime.getHour() + ":" + machineTime.getMinute() + ":" + machineTime.getSecond();
         System.out.println("Slave sentence to master: "+sentence);
         byte[] packageMsg = sentence.getBytes();
         DatagramPacket sendPacket = new DatagramPacket(packageMsg, sentence.length(), packet.getAddress(), packet.getPort());

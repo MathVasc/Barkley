@@ -205,13 +205,15 @@ class Master {
                 Map<NodeMachine, LocalTime> timesCorrect = timeCorrect(deltaTimes(responses));
             
                 for (Map.Entry<NodeMachine, LocalTime> timeCorrect : timesCorrect.entrySet()) {
-                    sendMessage(timeCorrect.getKey(), round, timeCorrect.toString());
+                    String sendTime =  timeCorrect.getValue().getHour() + ":" + timeCorrect.getValue().getMinute() + ":" + timeCorrect.getValue().getSecond();
+                    sendMessage(timeCorrect.getKey(), round, sendTime);
                 }
                 
                 List<NodeMachine> outOfLimitNodes = outOfLimitTimes(responses);
                 
                 for (NodeMachine node : outOfLimitNodes){
-                    sendMessage(node, round, machineTime.toString());
+                    String sendTime =  machineTime.getHour() + ":" + machineTime.getMinute() + ":" + machineTime.getSecond();
+                    sendMessage(node, round, sendTime);
                 }
                 round++;
             }
