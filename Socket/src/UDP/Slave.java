@@ -65,7 +65,7 @@ class Slave {
                     sendMessage(sentenceComponents[0], receivePacket);
                 }else{
                     String[] stringTimeComponents = sentenceComponents[2].split(":");
-                    LocalTime newTime = LocalTime.of(Integer.parseInt(stringTimeComponents[0]), Integer.parseInt(stringTimeComponents[1]));
+                    LocalTime newTime = LocalTime.of(Integer.parseInt(stringTimeComponents[0]), Integer.parseInt(stringTimeComponents[1]), Integer.parseInt(stringTimeComponents[2]));
                     updateTime(newTime);
                 }
             }
