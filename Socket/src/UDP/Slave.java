@@ -32,7 +32,7 @@ class Slave {
     
     private void initMaster(NodeMachine master){
         try {
-            masterSocket = new DatagramSocket(8080);
+            masterSocket = new DatagramSocket(master.getPort());
         } catch (SocketException ex) {
             Logger.getLogger(Slave.class.getName()).log(Level.SEVERE, null, ex);
         }
